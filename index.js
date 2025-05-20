@@ -38,8 +38,15 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+    const plantCollection=client.db('PlantsDB').collection('plants');
+    const userCollection=client.db('PlantsDB').collection('users');
 
-    const userCollection=client.db('PlantsDB').collection('users')
+
+    app.post('/plants',async(req,res)=>{
+      const newPlant=req.body;
+      const result= await plantCollection.insertOne(newPlant);
+      res.send(result);
+    })
     app.get('/users',async(req,res)=>{
       const result=await userCollection.find().toArray()
       res.send(result)
