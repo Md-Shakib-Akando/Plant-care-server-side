@@ -41,7 +41,10 @@ async function run() {
     const plantCollection=client.db('PlantsDB').collection('plants');
     const userCollection=client.db('PlantsDB').collection('users');
 
-
+    app.get('/plants',async(req,res)=>{
+      const result= await plantCollection.find().toArray();
+      res.send(result)
+    })
     app.post('/plants',async(req,res)=>{
       const newPlant=req.body;
       const result= await plantCollection.insertOne(newPlant);
