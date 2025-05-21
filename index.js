@@ -1,9 +1,9 @@
-const express =require('express');
-const cors=require('cors');
+const express = require('express');
+const cors = require('cors');
 require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const app= express();
-const port=process.env.PORT || 3000;
+const app = express();
+const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -11,14 +11,14 @@ app.use(express.json());
 
 
 
-app.get('/',(req,res)=>{
-    res.send("hello world");
+app.get('/', (req, res) => {
+  res.send("hello world");
 })
 
 
 
-app.listen(port,()=>{
-    console.log(`port on ${port}`);
+app.listen(port, () => {
+  console.log(`port on ${port}`);
 })
 
 
@@ -38,56 +38,55 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-    const plantCollection=client.db('PlantsDB').collection('plants');
-    const userCollection=client.db('PlantsDB').collection('users');
+    const plantCollection = client.db('PlantsDB').collection('plants');
+    const userCollection = client.db('PlantsDB').collection('users');
 
-    app.get('/plants/:id',async(req,res)=>{
-      const id=req.params.id;
-      const query={_id: new ObjectId(id)}
-      const result=await plantCollection.findOne(query);
+    app.get('/plants/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await plantCollection.findOne(query);
       res.send(result);
     })
 
-    app.get('/plants',async(req,res)=>{
-      const result= await plantCollection.find().toArray();
+    app.get('/plants', async (req, res) => {
+      const result = await plantCollection.find().toArray();
       res.send(result)
     })
 
-    app.post('/plants',async(req,res)=>{
-      const newPlant=req.body;
-      const result= await plantCollection.insertOne(newPlant);
+    app.post('/plants', async (req, res) => {
+      const newPlant = req.body;
+      const result = await plantCollection.insertOne(newPlant);
       res.send(result);
     })
-    app.get('/users',async(req,res)=>{
-      const result=await userCollection.find().toArray()
+    app.get('/users', async (req, res) => {
+      const result = await userCollection.find().toArray()
       res.send(result)
     })
-    
-    app.post('/users', async(req,res)=>{
-      const userProfile=req.body;
-     
+
+    app.post('/users', async (req, res) => {
+      const userProfile = req.body;
+
       const result = await userCollection.insertOne(userProfile);
       res.send(result);
     })
-    app.put('/plants/:id',async(req,res)=>{
-      const id=req.params.id;
-      const filter={_id: new ObjectId(id)}
-      const updatedCoffee=req.body;
-      const updateDoc={
-        $set:updatedCoffee
-      }
-      const result=await plantCollection.deleteOne(filter,updateDoc);
+    app.put('/plants/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedCoffee = req.body;
+      const updateDoc = { $set: updatedCoffee };
+      const result = await plantCollection.updateOne(filter, updateDoc);
       res.send(result);
-    })
-    
+    });
 
-    app.delete('/plants/:id',async(req,res)=>{
-      const id=req.params.id;
-      const query={_id: new ObjectId(id)}
-      const result=await plantCollection.deleteOne(query);
+
+
+    app.delete('/plants/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await plantCollection.deleteOne(query);
       res.send(result);
     })
-    
+
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
