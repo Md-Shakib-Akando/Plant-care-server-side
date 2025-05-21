@@ -69,6 +69,17 @@ async function run() {
       const result = await userCollection.insertOne(userProfile);
       res.send(result);
     })
+    app.put('/plants/:id',async(req,res)=>{
+      const id=req.params.id;
+      const filter={_id: new ObjectId(id)}
+      const updatedCoffee=req.body;
+      const updateDoc={
+        $set:updatedCoffee
+      }
+      const result=await plantCollection.deleteOne(filter,updateDoc);
+      res.send(result);
+    })
+    
 
     app.delete('/plants/:id',async(req,res)=>{
       const id=req.params.id;
