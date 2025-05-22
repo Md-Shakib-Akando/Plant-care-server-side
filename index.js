@@ -56,6 +56,7 @@ async function run() {
     app.post('/plants', async (req, res) => {
       const newPlant = {
         ...req.body,
+        nextWatering: new Date(req.body.nextWatering),
         createdAt: new Date()
       };
       const result = await plantCollection.insertOne(newPlant);
@@ -69,8 +70,8 @@ async function run() {
     app.get('/latest-plants', async (req, res) => {
       const result = await plantCollection
         .find()
-        .sort({ createdAt: -1 }) 
-        .limit(6) 
+        .sort({ createdAt: -1 })
+        .limit(6)
         .toArray();
 
       res.send(result);
@@ -79,29 +80,43 @@ async function run() {
 
 
     app.get('/plants-sorted', async (req, res) => {
-      const plantSorting = [
-        {
-          $addFields: {
-            careLevelRank: {
-              $switch: {
-                branches: [
-                  { case: { $eq: ["$careLevel", "easy"] }, then: 1 },
-                  { case: { $eq: ["$careLevel", "moderate"] }, then: 2 },
-                  { case: { $eq: ["$careLevel", "difficult"] }, then: 3 }
-                ],
-                default: 4
+      const sortBy = req.query.sortBy;
+      
+      let sortStage = [];
+
+      if (sortBy === 'careLevel') {
+        sortStage = [
+          {
+            $addFields: {
+              careLevelRank: {
+                $switch: {
+                  branches: [
+                    { case: { $eq: ["$careLevel", "easy"] }, then: 1 },
+                    { case: { $eq: ["$careLevel", "moderate"] }, then: 2 },
+                    { case: { $eq: ["$careLevel", "difficult"] }, then: 3 },
+                  ],
+                  default: 4
+                }
               }
             }
-          }
-        },
-        {
-          $sort: { careLevelRank: 1 }
-        }
-      ];
+          },
+          { $sort: { careLevelRank: 1 } }
+        ];
+      } else if (sortBy === 'nextWatering') {
+        sortStage = [
+          {
+            $addFields: {
+              nextWateringDate: { $toDate: "$nextWatering" }
+            }
+          },
+          { $sort: { nextWateringDate: 1 } }
+        ];
+      }
 
-      const result = await plantCollection.aggregate(plantSorting).toArray();
+      const result = await plantCollection.aggregate(sortStage).toArray();
       res.send(result);
     });
+
 
 
     app.post('/users', async (req, res) => {
