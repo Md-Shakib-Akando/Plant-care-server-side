@@ -63,6 +63,32 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/plants-sorted', async (req, res) => {
+      const plantSorting = [
+        {
+          $addFields: {
+            careLevelRank: {
+              $switch: {
+                branches: [
+                  { case: { $eq: ["$careLevel", "easy"] }, then: 1 },
+                  { case: { $eq: ["$careLevel", "moderate"] }, then: 2 },
+                  { case: { $eq: ["$careLevel", "difficult"] }, then: 3 }
+                ],
+                default: 4
+              }
+            }
+          }
+        },
+        {
+          $sort: { careLevelRank: 1 }
+        }
+      ];
+
+      const result = await plantCollection.aggregate(plantSorting).toArray();
+      res.send(result);
+    });
+
+
     app.post('/users', async (req, res) => {
       const userProfile = req.body;
 
