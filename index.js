@@ -54,7 +54,10 @@ async function run() {
     })
 
     app.post('/plants', async (req, res) => {
-      const newPlant = req.body;
+      const newPlant = {
+        ...req.body,
+        createdAt: new Date()
+      };
       const result = await plantCollection.insertOne(newPlant);
       res.send(result);
     })
@@ -62,6 +65,18 @@ async function run() {
       const result = await userCollection.find().toArray()
       res.send(result)
     })
+
+    app.get('/latest-plants', async (req, res) => {
+      const result = await plantCollection
+        .find()
+        .sort({ createdAt: -1 }) 
+        .limit(6) 
+        .toArray();
+
+      res.send(result);
+    });
+
+
 
     app.get('/plants-sorted', async (req, res) => {
       const plantSorting = [
