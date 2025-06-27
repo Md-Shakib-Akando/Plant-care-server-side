@@ -47,7 +47,7 @@ async function run() {
         })
 
         app.get('/plants', async (req, res) => {
-            const result = await plantCollection.find().toArray();
+            const result = await plantCollection.find().collation({ locale: "en", strength: 2 }).sort({ PlantName: 1 }).toArray();
             res.send(result)
         })
 
@@ -69,7 +69,7 @@ async function run() {
             const result = await plantCollection
                 .find()
                 .sort({ createdAt: -1 })
-                .limit(6)
+                .limit(8)
                 .toArray();
 
             res.send(result);
